@@ -1,0 +1,42 @@
+nano clickstream_data.txt
+input
+nano clickstream_data.py
+
+ 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import count, when, lag
+from pyspark.sql.window import Window
+
+# Create SparkSession
+spark = SparkSession.builder \
+    .appName("Clickstream Analysis") \
+    .getOrCreate()
+
+# Load data into DataFrame
+clickstream_df = spark.read.csv("clickstream_data.txt", header=True, inferSchema=True)
+
+# Display schema
+clickstream_df.printSchema()
+
+# Display first 5 rows
+clickstream_df.show(5)
+
+# Calculate total number of clicks, views, and purchases for each user
+user_actions = clickstream_df.groupBy("user_id", "action").count()
+
+clicks_views_purchases = user_actions.groupBy("user_id") \
+    .pivot("action", ["click", "view", "purchase"]).agg(count("count").alias("count"))
+
+clicks_views_purchases.show()
+
+# Identify the most common sequence of actions performed by users
+action_window = Window.partitionBy("user_id").orderBy("timestamp")
+
+clickstream_df = clickstream_df.withColumn("prev_action", lag("action", 1).over(action_window))
+
+common_sequences = clickstream_df.groupBy("user_id", "action", "prev_action").count() \
+    .orderBy("count", ascending=False)
+
+common_sequences.show()
+
+spark-submit clickstream_data.py
