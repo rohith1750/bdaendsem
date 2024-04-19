@@ -1,0 +1,41 @@
+create a dir in root named one
+mkdir one
+cd one
+nano input.txt
+nano word.pig
+to run in local mode
+-- Load data
+data = LOAD 'input.txt' AS (line:CHARARRAY);
+
+-- Tokenize words
+words = FOREACH data GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+-- Group by word and count occurrences
+word_count = GROUP words BY word;
+word_count_result = FOREACH word_count GENERATE group AS word, COUNT(words) AS count;
+
+-- Store result
+STORE word_count_result INTO '/one/out';
+it will store in out in one dir
+
+
+to run in mapreduce
+
+hdfs dfs -mkdir /bda
+hdfs dfs -put input.txt /bda/
+-- Load data
+data = LOAD '/bda/input.txt' AS (line:CHARARRAY);
+
+-- Tokenize words
+words = FOREACH data GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+-- Group by word and count occurrences
+word_count = GROUP words BY word;
+word_count_result = FOREACH word_count GENERATE group AS word, COUNT(words) AS count;
+
+-- Store result
+STORE word_count_result INTO '/bda/out';
+
+
+
+
