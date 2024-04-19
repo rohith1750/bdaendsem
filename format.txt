@@ -1,0 +1,23 @@
+Mapreduce:
+Nano input.txt
+Nano mapper.py
+Nano reducer.py
+Cat input.txt | python3 mapper.py
+Cat input.txt | python3 mapper.py | sort | python3 reducer.py
+
+Pig:
+Nano input.txt
+Nano input.pig
+pig -x local input.pig
+
+Scala:
+Nano input.txt
+Nano q.scala
+Spark-shell
+:load q.scala
+FlatMapexample.main(Array())
+
+Pyspark:
+Nano input.csv
+Nano input.py
+Spark-submit input.py
